@@ -9,9 +9,11 @@
     <RootNamespace>WebPageScreensaver</RootNamespace>
     <AssemblyName>WebPageScreensaver</AssemblyName>
     <Version>2.0.2-Alpha</Version>
-    <PublishTrimmed>true</PublishTrimmed>
+    <PublishTrimmed>false</PublishTrimmed>
     <PublishReadyToRunShowWarnings>true</PublishReadyToRunShowWarnings>
     <Platforms>x64;x86</Platforms>
+	<InvariantGlobalization>false</InvariantGlobalization>
+	<EnableDynamicLoading>true</EnableDynamicLoading>
   </PropertyGroup>
 
   <ItemGroup>

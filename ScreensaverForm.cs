@@ -2,15 +2,26 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 namespace WebPageScreensaver
 {
     internal partial class ScreensaverForm : Form
     {
+        private const int HOTKEY_ID = 0xBEEF;
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, uint vk);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern bool UnregisterHotKey(IntPtr hWnd, int id);
         private int _currentURLIndex;
 
         private readonly Timer _timer;
+        // Timer that hides the cursor after a period of inactivity
+        private readonly Timer _idleTimer;
+        private const int IdleTimeoutMs = 5 * 60 * 1000; // 5 minutes
+        private InputActivityMessageFilter _activityFilter;
         private readonly bool _closeOnMouseMovement;
         private readonly int _rotationInterval;
         private readonly bool _shuffle;
@@ -30,8 +41,12 @@ namespace WebPageScreensaver
             _savedSize = new Size(screen.Bounds.Width, screen.Bounds.Height);
             _savedLocation = new Point(screen.Bounds.Left, screen.Bounds.Top);
 
-            Cursor.Hide();
             InitializeComponent();
+
+            // Let the form receive key events before the focused control (helps capture Escape)
+            this.KeyPreview = true;
+            // Ensure Load handler is attached
+            this.Load += ScreensaverForm_Load;
 
             // Manually change size and location, since the `InitializeComponent` code tends to get autoreplaced by the Designer
             this.SuspendLayout();
@@ -42,6 +57,50 @@ namespace WebPageScreensaver
             this.ResumeLayout(false);
 
             _timer = new Timer();
+
+            // Idle timer: hide cursor after IdleTimeoutMs of no user activity
+            _idleTimer = new Timer();
+            _idleTimer.Interval = IdleTimeoutMs;
+            _idleTimer.Tick += IdleTimer_Tick;
+
+            // Install a message filter that notifies on any user input so we can reset the idle timer
+            _activityFilter = new InputActivityMessageFilter();
+            _activityFilter.UserActivity += ActivityFilter_UserActivity;
+            Application.AddMessageFilter(_activityFilter);
+            // Try to catch ESC when the WebView2 control forwards preview key events
+            _webBrowser.PreviewKeyDown += WebBrowser_PreviewKeyDown;
+            _idleTimer.Start();
+        }
+
+        private void IdleTimer_Tick(object? sender, EventArgs e)
+        {
+            // Hide the cursor when we've been idle for the configured timeout
+            Cursor.Hide();
+            _idleTimer.Stop();
+        }
+
+        private void ActivityFilter_UserActivity(object? sender, EventArgs e)
+        {
+            // Any user activity should make the cursor visible and restart the idle timer
+            Cursor.Show();
+
+            // If configured to close on mouse movement, close immediately on mouse activity
+            if (_closeOnMouseMovement)
+            {
+                Close();
+                return;
+            }
+
+            // Restart the idle timer so the cursor will be hidden again after the timeout
+            if (!_idleTimer.Enabled)
+            {
+                _idleTimer.Start();
+            }
+            else
+            {
+                _idleTimer.Stop();
+                _idleTimer.Start();
+            }
         }
 
         private async void ScreensaverForm_Load(object sender, EventArgs e)
@@ -50,7 +109,30 @@ namespace WebPageScreensaver
             {
                 throw new NullReferenceException("webBrowser should have been initialized by now.");
             }
+
             await _webBrowser.EnsureCoreWebView2Async();
+
+            // Note: do not use CoreWebView2.AcceleratorKeyPressed (may not be available in this SDK).
+            // We rely on form KeyPreview, PreviewKeyDown on the WebView and the IMessageFilter fallback.
+
+            // Inject a script into every page loaded in the WebView2 that posts a message
+            // to the host when the Escape key is pressed. This is the most reliable way
+            // to observe plain Escape presses when the page has focus.
+            try
+            {
+                await _webBrowser.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(
+                    "document.addEventListener('keydown', function(e) { if (e.key === 'Escape') { window.chrome.webview.postMessage('escape'); } }, true);");
+
+                _webBrowser.CoreWebView2.WebMessageReceived += CoreWebView2_WebMessageReceived;
+            }
+            catch
+            {
+                // Ignore failures to inject script on older runtimes; other fallbacks remain.
+            }
+
+            // Register a system hotkey for plain Escape as a reliable fallback when WebView2
+            // consumes keyboard input. We register it with no modifiers.
+            RegisterHotKey(this.Handle, HOTKEY_ID, 0, (uint)Keys.Escape);
 
             if (_urls.Any())
             {
@@ -77,6 +159,82 @@ namespace WebPageScreensaver
             else
             {
                 _webBrowser.Visible = false;
+            }
+        }
+
+        protected override void WndProc(ref Message m)
+        {
+            const int WM_HOTKEY = 0x0312;
+            if (m.Msg == WM_HOTKEY)
+            {
+                int id = m.WParam.ToInt32();
+                // our registered hotkey id
+                if (id == 0xBEEF)
+                {
+                    Application.Exit();
+                    return;
+                }
+            }
+
+            base.WndProc(ref m);
+        }
+
+        // AcceleratorKeyPressed handler removed: not available in all WebView2 SDKs.
+
+        private void CoreWebView2_WebMessageReceived(object? sender, Microsoft.Web.WebView2.Core.CoreWebView2WebMessageReceivedEventArgs e)
+        {
+            try
+            {
+                var msg = e.TryGetWebMessageAsString();
+                if (string.Equals(msg, "escape", StringComparison.OrdinalIgnoreCase))
+                {
+                    Application.Exit();
+                }
+            }
+            catch { }
+        }
+
+        private void WebBrowser_PreviewKeyDown(object? sender, PreviewKeyDownEventArgs e)
+        {
+            if (e.KeyCode == Keys.Escape)
+            {
+                Application.Exit();
+            }
+        }
+
+        protected override void OnFormClosed(FormClosedEventArgs e)
+        {
+            base.OnFormClosed(e);
+
+            try
+            {
+                // Ensure timers are stopped and message filter removed
+                _timer?.Stop();
+                _idleTimer?.Stop();
+                if (_activityFilter != null)
+                {
+                    Application.RemoveMessageFilter(_activityFilter);
+                    _activityFilter.UserActivity -= ActivityFilter_UserActivity;
+                }
+
+                // No CoreWebView2 accelerator to unsubscribe; nothing to do here.
+
+                // Unregister hotkey
+                UnregisterHotKey(this.Handle, HOTKEY_ID);
+                // Unsubscribe WebMessageReceived if we subscribed
+                try
+                {
+                    if (_webBrowser?.CoreWebView2 != null)
+                    {
+                        _webBrowser.CoreWebView2.WebMessageReceived -= CoreWebView2_WebMessageReceived;
+                    }
+                }
+                catch { }
+            }
+            finally
+            {
+                // Make sure cursor is visible when exiting
+                Cursor.Show();
             }
         }
 
@@ -109,12 +267,72 @@ namespace WebPageScreensaver
         /// </summary>
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
-            if (keyData == Keys.Escape)
+            // Exit on Escape
+            if ((keyData & Keys.KeyCode) == Keys.Escape)
             {
-                Close();
+                Application.Exit();
                 return true;
             }
-            return base.ProcessCmdKey(ref msg, keyData);
+
+            // Allow Alt+F4 to fall through to default handling (closes the window)
+            if ((keyData & Keys.KeyCode) == Keys.F4 && (keyData & Keys.Alt) == Keys.Alt)
+            {
+                return base.ProcessCmdKey(ref msg, keyData);
+            }
+
+            // NOTE: Secure attention sequences like Ctrl+Alt+Delete cannot be intercepted
+            // by user-mode applications — the OS handles them and they cannot be forwarded/blocked here.
+
+            // Consume every other key so it does nothing
+            return true;
+        }
+    }
+
+    /// <summary>
+    /// Watches for basic user input (mouse move, mouse clicks, key presses) and exposes a UserActivity event.
+    /// </summary>
+    internal class InputActivityMessageFilter : IMessageFilter
+    {
+        public event EventHandler? UserActivity;
+
+        // Window message constants we care about
+        private const int WM_MOUSEMOVE = 0x0200;
+        private const int WM_LBUTTONDOWN = 0x0201;
+        private const int WM_RBUTTONDOWN = 0x0204;
+        private const int WM_MBUTTONDOWN = 0x0207;
+        private const int WM_MOUSEWHEEL = 0x020A;
+        private const int WM_KEYDOWN = 0x0100;
+
+        public bool PreFilterMessage(ref Message m)
+        {
+            switch (m.Msg)
+            {
+                case WM_MOUSEMOVE:
+                case WM_LBUTTONDOWN:
+                case WM_RBUTTONDOWN:
+                case WM_MBUTTONDOWN:
+                case WM_MOUSEWHEEL:
+                    OnUserActivity();
+                    break;
+                case WM_KEYDOWN:
+                    // If Escape pressed at the application level, exit immediately.
+                    int vk = (int)(m.WParam.ToInt64() & 0xFFFF);
+                    if (vk == 0x1B) // VK_ESCAPE
+                    {
+                        Application.Exit();
+                        return true; // consumed
+                    }
+                    OnUserActivity();
+                    break;
+            }
+
+            // Do not block the message from reaching controls
+            return false;
+        }
+
+        private void OnUserActivity()
+        {
+            UserActivity?.Invoke(this, EventArgs.Empty);
         }
     }
 }
