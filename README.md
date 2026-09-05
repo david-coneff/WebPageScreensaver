@@ -8,7 +8,7 @@ Inspired by its predecesor [cwc/web-page-screensaver](https://github.com/cwc/web
 
 Version|64-bit
 ---|---
-| build [`8b32c19`](https://github.com/david-coneff/WebPageScreensaver/commit/8b32c19) | [Download](https://github.com/david-coneff/WebPageScreensaver/releases/tag/build-8b32c19) |
+| build [`6e9e74f`](https://github.com/david-coneff/WebPageScreensaver/commit/6e9e74f) | [Download](https://github.com/david-coneff/WebPageScreensaver/releases/tag/build-6e9e74f) |
 
 Self-contained single-file build (~130MB) — no separate .NET runtime install needed.
 Published as a [GitHub Release](https://github.com/david-coneff/WebPageScreensaver/releases)
@@ -31,6 +31,17 @@ build one yourself via `PublishX86.pubxml` if you need it.
     ![Screenshot](screenshot.png)
 
   * Select `Install` if you want it to be added to your list of Windows screensavers. The Windows `Screen Saver Settings` window will pop up with this screensaver selected.
+
+## Staying logged in
+
+If a page needs you to be signed in, open `Configure` and click **Log In...**. This opens a
+normal browser window sharing the screensaver's own persistent session — sign in there once,
+close the window, and the screensaver will show the page already logged in from then on. No
+separate account/credential setup: it's the same underlying browser profile (WebView2) either
+way, just a window you can type into. See
+[WebPageScreensaver-memory:state/session-recovery-design.md](https://github.com/david-coneff/WebPageScreensaver-memory/blob/main/state/session-recovery-design.md)
+for how this works and its one known edge case (don't leave the login window open and idle for
+a long time — it can conflict with the screensaver starting on its own).
 
 ## Dependencies
 
