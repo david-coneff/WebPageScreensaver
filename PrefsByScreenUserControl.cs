@@ -22,6 +22,7 @@ namespace WebPageScreensaver
             currentScreen.URLs = (from ListViewItem item in _listViewURLs.Items.Cast<ListViewItem>() select item.Text);
             currentScreen.RotationInterval = (int)_numericUpDownRotationInterval.Value;
             currentScreen.Shuffle = _checkBoxShuffle.Checked;
+            currentScreen.ZoomPercent = (int)_numericUpDownZoomPercent.Value;
         }
 
         private void ButtonDown_Click(object sender, EventArgs e)

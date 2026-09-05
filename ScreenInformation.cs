@@ -13,6 +13,7 @@ namespace WebPageScreensaver
         private const string URLsName = "URLs";
         private const string RotationIntervalName = "IntervalRotation";
         private const string ShuffleName = "Shuffle";
+        private const string ZoomPercentName = "ZoomPercent";
 
         public ScreenInformation(RegistryKey rootKey, int screenNumber, MultiScreenMode multiScreenMode)
         {
@@ -47,6 +48,18 @@ namespace WebPageScreensaver
         {
             get => bool.Parse(RootKey.GetOrCreateValue(ShuffleName, true /* default */));
             set => RootKey.SetValue(ShuffleName, value);
+        }
+
+        /// <summary>
+        /// The WebView2 zoom level to apply to every page shown on this screen, as a percentage
+        /// (100 = no zoom). Lets a display that needs a dashboard scaled up or down — e.g. a
+        /// Home Assistant panel sized for a different resolution than it was designed for — default
+        /// to the right zoom on every screensaver launch, instead of it resetting each time.
+        /// </summary>
+        public int ZoomPercent
+        {
+            get => int.Parse(RootKey.GetOrCreateValue(ZoomPercentName, 100 /* default */));
+            set => RootKey.SetValue(ZoomPercentName, value);
         }
 
         private static Rectangle FindEnclosingRectangle()

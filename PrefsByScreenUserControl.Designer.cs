@@ -29,6 +29,8 @@
             this.components = new System.ComponentModel.Container();
             this._numericUpDownRotationInterval = new System.Windows.Forms.NumericUpDown();
             this._labelSecondsToDisplay = new System.Windows.Forms.Label();
+            this._numericUpDownZoomPercent = new System.Windows.Forms.NumericUpDown();
+            this._labelZoomPercent = new System.Windows.Forms.Label();
             this._checkBoxShuffle = new System.Windows.Forms.CheckBox();
             this._listViewURLs = new System.Windows.Forms.ListView();
             this._buttonAddURL = new System.Windows.Forms.Button();
@@ -40,6 +42,7 @@
             this._tableLayoutPanelMainTop = new System.Windows.Forms.TableLayoutPanel();
             this._tableLayoutPanelMainBottom = new System.Windows.Forms.TableLayoutPanel();
             ((System.ComponentModel.ISupportInitialize)(this._numericUpDownRotationInterval)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this._numericUpDownZoomPercent)).BeginInit();
             this._tableLayoutPanelMain.SuspendLayout();
             this._tableLayoutPanelMainTop.SuspendLayout();
             this._tableLayoutPanelMainBottom.SuspendLayout();
@@ -76,7 +79,34 @@
             this._labelSecondsToDisplay.Name = "_labelSecondsToDisplay";
             this._labelSecondsToDisplay.Size = new System.Drawing.Size(154, 15);
             this._labelSecondsToDisplay.Text = "Seconds to display each site";
-            // 
+            //
+            // _numericUpDownZoomPercent
+            //
+            this._numericUpDownZoomPercent.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this._numericUpDownZoomPercent.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this._numericUpDownZoomPercent.Increment = new decimal(new int[] { 5, 0, 0, 0 });
+            this._numericUpDownZoomPercent.Location = new System.Drawing.Point(378, 6);
+            this._numericUpDownZoomPercent.Margin = new System.Windows.Forms.Padding(6);
+            this._numericUpDownZoomPercent.Maximum = new decimal(new int[] { 500, 0, 0, 0 });
+            this._numericUpDownZoomPercent.Minimum = new decimal(new int[] { 25, 0, 0, 0 });
+            this._numericUpDownZoomPercent.Name = "_numericUpDownZoomPercent";
+            this._numericUpDownZoomPercent.Size = new System.Drawing.Size(50, 23);
+            this._numericUpDownZoomPercent.TabIndex = 13;
+            this._numericUpDownZoomPercent.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this._numericUpDownZoomPercent.Value = new decimal(new int[] { 100, 0, 0, 0 });
+            //
+            // _labelZoomPercent
+            //
+            this._labelZoomPercent.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this._labelZoomPercent.AutoSize = true;
+            this._labelZoomPercent.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this._labelZoomPercent.Location = new System.Drawing.Point(440, 10);
+            this._labelZoomPercent.Margin = new System.Windows.Forms.Padding(6);
+            this._labelZoomPercent.Name = "_labelZoomPercent";
+            this._labelZoomPercent.Size = new System.Drawing.Size(66, 15);
+            this._labelZoomPercent.Text = "% zoom";
+            this._toolTipURLButtons.SetToolTip(this._labelZoomPercent, "The default zoom level to open this display's pages at (100 = no zoom).");
+            //
             // _checkBoxShuffle
             // 
             this._checkBoxShuffle.Anchor = System.Windows.Forms.AnchorStyles.Left;
@@ -208,13 +238,17 @@
             // 
             this._tableLayoutPanelMainBottom.AutoSize = true;
             this._tableLayoutPanelMainBottom.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this._tableLayoutPanelMainBottom.ColumnCount = 3;
+            this._tableLayoutPanelMainBottom.ColumnCount = 5;
             this._tableLayoutPanelMainBottom.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this._tableLayoutPanelMainBottom.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this._tableLayoutPanelMainBottom.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this._tableLayoutPanelMainBottom.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this._tableLayoutPanelMainBottom.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this._tableLayoutPanelMainBottom.Controls.Add(this._checkBoxShuffle, 0, 0);
             this._tableLayoutPanelMainBottom.Controls.Add(this._labelSecondsToDisplay, 2, 0);
             this._tableLayoutPanelMainBottom.Controls.Add(this._numericUpDownRotationInterval, 1, 0);
+            this._tableLayoutPanelMainBottom.Controls.Add(this._numericUpDownZoomPercent, 3, 0);
+            this._tableLayoutPanelMainBottom.Controls.Add(this._labelZoomPercent, 4, 0);
             this._tableLayoutPanelMainBottom.Dock = System.Windows.Forms.DockStyle.Fill;
             this._tableLayoutPanelMainBottom.Location = new System.Drawing.Point(0, 125);
             this._tableLayoutPanelMainBottom.Margin = new System.Windows.Forms.Padding(0);
@@ -234,6 +268,7 @@
             this.Name = "PrefsByScreenUserControl";
             this.Size = new System.Drawing.Size(320, 160);
             ((System.ComponentModel.ISupportInitialize)(this._numericUpDownRotationInterval)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this._numericUpDownZoomPercent)).EndInit();
             this._tableLayoutPanelMain.ResumeLayout(false);
             this._tableLayoutPanelMain.PerformLayout();
             this._tableLayoutPanelMainTop.ResumeLayout(false);
@@ -257,6 +292,8 @@
         public System.Windows.Forms.CheckBox _checkBoxShuffle;
         public System.Windows.Forms.NumericUpDown _numericUpDownRotationInterval;
         private System.Windows.Forms.Label _labelSecondsToDisplay;
+        public System.Windows.Forms.NumericUpDown _numericUpDownZoomPercent;
+        private System.Windows.Forms.Label _labelZoomPercent;
 
         private System.Windows.Forms.ToolTip _toolTipURLButtons;
         private System.ComponentModel.IContainer components;

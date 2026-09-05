@@ -93,6 +93,7 @@ namespace WebPageScreensaver
 
                 currentUserControl._numericUpDownRotationInterval.Value = currentScreen.RotationInterval;
                 currentUserControl._checkBoxShuffle.Checked = currentScreen.Shuffle;
+                currentUserControl._numericUpDownZoomPercent.Value = currentScreen.ZoomPercent;
 
                 tab.Controls.Add(currentUserControl);
                 _tabControlScreens.TabPages.Add(tab);
