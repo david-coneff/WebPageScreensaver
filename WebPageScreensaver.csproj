@@ -20,8 +20,22 @@
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.774.44" />
   </ItemGroup>
 
+  <!-- MSBuild's own Copy task, not the OS `copy`/`cp` shell command: this runs identically
+       whether the build is invoked from Windows, or cross-compiled from Linux/macOS (the
+       committed .scr in this repo is built that way, via `dotnet publish -r win-x64`). -->
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="copy $(TargetDir)$(TargetName).exe $(TargetDir)$(TargetName).scr" />
+    <Copy SourceFiles="$(TargetDir)$(TargetName).exe" DestinationFiles="$(TargetDir)$(TargetName).scr"
+          Condition="Exists('$(TargetDir)$(TargetName).exe')" />
+  </Target>
+
+  <!-- A `dotnet publish` (single-file, self-contained — the PublishX64/X86 profiles) produces
+       its packaged .exe by bundling AFTER the build's own PostBuildEvent already ran, so the
+       target above copies nothing: at that point the intermediate dir holds only the
+       unbundled .dll. This second target does the same rename against the PUBLISH output,
+       once the real single-file .exe exists there. -->
+  <Target Name="PostPublish" AfterTargets="Publish">
+    <Copy SourceFiles="$(PublishDir)$(TargetName).exe" DestinationFiles="$(PublishDir)$(TargetName).scr"
+          Condition="Exists('$(PublishDir)$(TargetName).exe')" />
   </Target>
 
 </Project>
