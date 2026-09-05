@@ -8,7 +8,7 @@ Inspired by its predecesor [cwc/web-page-screensaver](https://github.com/cwc/web
 
 Version|64-bit
 ---|---
-| build [`6e9e74f`](https://github.com/david-coneff/WebPageScreensaver/commit/6e9e74f) | [Download](https://github.com/david-coneff/WebPageScreensaver/releases/tag/build-6e9e74f) |
+| build [`a72b6eb`](https://github.com/david-coneff/WebPageScreensaver/commit/a72b6eb) | [Download](https://github.com/david-coneff/WebPageScreensaver/releases/tag/build-a72b6eb) |
 
 Self-contained single-file build (~130MB) — no separate .NET runtime install needed.
 Published as a [GitHub Release](https://github.com/david-coneff/WebPageScreensaver/releases)
@@ -42,6 +42,25 @@ way, just a window you can type into. See
 [WebPageScreensaver-memory:state/session-recovery-design.md](https://github.com/david-coneff/WebPageScreensaver-memory/blob/main/state/session-recovery-design.md)
 for how this works and its one known edge case (don't leave the login window open and idle for
 a long time — it can conflict with the screensaver starting on its own).
+
+## Zoom
+
+Each screen has its own default zoom level (Preferences → the "% zoom" field, next to rotation
+interval) — useful when a display needs a dashboard (e.g. a Home Assistant panel) scaled up or
+down to actually fit. It's applied on every launch, not just remembered from the last time you
+manually zoomed.
+
+## Security
+
+Because a screensaver is shown to whoever is physically at the machine, the display itself (not
+the Log In window — see above) disables the browser surface that has nothing to do with
+rendering a page: no right-click menu, no DevTools, no Ctrl+P/S/O/F shortcuts, no downloads,
+popups redirect into the same window instead of opening a new one, navigation is restricted to
+the screen's own configured site(s), and the Windows accessibility shortcuts (Sticky/Toggle/
+Filter Keys) are disabled while showing and restored on exit. This assumes Windows' own "on
+resume, display logon screen" setting is enabled — without it, none of this matters, since
+dismissing the screensaver normally already hands over the real desktop. Full details and named
+gaps: [WebPageScreensaver-memory:state/unattended-display-hardening.md](https://github.com/david-coneff/WebPageScreensaver-memory/blob/main/state/unattended-display-hardening.md).
 
 ## Dependencies
 
