@@ -37,6 +37,7 @@
             this._radioButtonSpanScreens = new System.Windows.Forms.RadioButton();
             this._tableLayoutPanelMain = new System.Windows.Forms.TableLayoutPanel();
             this._tableLayoutPanelMainBottom = new System.Windows.Forms.TableLayoutPanel();
+            this._buttonLogIn = new System.Windows.Forms.Button();
             this._buttonCancel = new System.Windows.Forms.Button();
             this._buttonOK = new System.Windows.Forms.Button();
             this._tableLayoutPanelMainTop = new System.Windows.Forms.TableLayoutPanel();
@@ -172,13 +173,15 @@
             // 
             this._tableLayoutPanelMainBottom.AutoSize = true;
             this._tableLayoutPanelMainBottom.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this._tableLayoutPanelMainBottom.ColumnCount = 3;
+            this._tableLayoutPanelMainBottom.ColumnCount = 4;
             this._tableLayoutPanelMainBottom.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this._tableLayoutPanelMainBottom.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this._tableLayoutPanelMainBottom.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this._tableLayoutPanelMainBottom.Controls.Add(this._buttonCancel, 2, 0);
+            this._tableLayoutPanelMainBottom.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this._tableLayoutPanelMainBottom.Controls.Add(this._buttonCancel, 3, 0);
             this._tableLayoutPanelMainBottom.Controls.Add(this._linkLabelProjectURL, 0, 0);
-            this._tableLayoutPanelMainBottom.Controls.Add(this._buttonOK, 1, 0);
+            this._tableLayoutPanelMainBottom.Controls.Add(this._buttonOK, 2, 0);
+            this._tableLayoutPanelMainBottom.Controls.Add(this._buttonLogIn, 1, 0);
             this._tableLayoutPanelMainBottom.Dock = System.Windows.Forms.DockStyle.Fill;
             this._tableLayoutPanelMainBottom.Location = new System.Drawing.Point(0, 326);
             this._tableLayoutPanelMainBottom.Margin = new System.Windows.Forms.Padding(0);
@@ -186,9 +189,22 @@
             this._tableLayoutPanelMainBottom.RowCount = 1;
             this._tableLayoutPanelMainBottom.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this._tableLayoutPanelMainBottom.Size = new System.Drawing.Size(464, 35);
-            // 
+            //
+            // _buttonLogIn
+            //
+            this._buttonLogIn.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this._buttonLogIn.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this._buttonLogIn.Location = new System.Drawing.Point(209, 6);
+            this._buttonLogIn.Margin = new System.Windows.Forms.Padding(6);
+            this._buttonLogIn.Name = "_buttonLogIn";
+            this._buttonLogIn.Size = new System.Drawing.Size(75, 23);
+            this._buttonLogIn.TabIndex = 16;
+            this._buttonLogIn.Text = "Log In...";
+            this._buttonLogIn.UseVisualStyleBackColor = true;
+            this._buttonLogIn.Click += new System.EventHandler(this.ButtonLogIn_Click);
+            //
             // _buttonCancel
-            // 
+            //
             this._buttonCancel.Anchor = System.Windows.Forms.AnchorStyles.None;
             this._buttonCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this._buttonCancel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
@@ -321,6 +337,7 @@
         private System.Windows.Forms.LinkLabel _linkLabelProjectURL;
         private System.Windows.Forms.Button _buttonCancel;
         private System.Windows.Forms.Button _buttonOK;
+        private System.Windows.Forms.Button _buttonLogIn;
         private System.Windows.Forms.FlowLayoutPanel _flowLayoutPanelMultiScreenMode;
 
         private System.ComponentModel.IContainer components;

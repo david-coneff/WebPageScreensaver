@@ -131,6 +131,24 @@ namespace WebPageScreensaver
         }
 
         /// <summary>
+        /// Opens a real, interactive browser window (LoginForm) sharing the SAME persistent
+        /// WebView2 profile the screensaver itself uses. Log in there once; the screensaver
+        /// picks up the same session automatically from then on — see WebView2Session.
+        /// </summary>
+        private void ButtonLogIn_Click(object sender, EventArgs e)
+        {
+            string initialUrl = string.Empty;
+            if (_tabControlScreens.SelectedTab?.Controls[0] is PrefsByScreenUserControl userControl
+                && userControl._listViewURLs.Items.Count > 0)
+            {
+                initialUrl = userControl._listViewURLs.Items[0].Text;
+            }
+
+            using LoginForm loginForm = new LoginForm(initialUrl);
+            loginForm.ShowDialog(this);
+        }
+
+        /// <summary>
         /// Read the data from the form and save it in the registry.
         /// </summary>
         private void Save()

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -110,7 +111,21 @@ namespace WebPageScreensaver
                 throw new NullReferenceException("webBrowser should have been initialized by now.");
             }
 
-            await _webBrowser.EnsureCoreWebView2Async();
+            // Shared with the setup/login window (LoginForm) — see WebView2Session for why this
+            // is what makes the screensaver display an already-logged-in page rather than a
+            // fresh login form.
+            (Microsoft.Web.WebView2.Core.CoreWebView2Environment? environment, Exception? error) =
+                await WebView2Session.TryGetEnvironmentAsync();
+            if (environment == null)
+            {
+                // Rare (see WebView2Session's docstring): degrade to a blank screen instead of
+                // crashing the whole screensaver over what is normally a transient lock.
+                Debug.WriteLine($"WebPageScreensaver: could not initialize the shared browser session: {error}");
+                _webBrowser.Visible = false;
+                return;
+            }
+
+            await _webBrowser.EnsureCoreWebView2Async(environment);
 
             // Note: do not use CoreWebView2.AcceleratorKeyPressed (may not be available in this SDK).
             // We rely on form KeyPreview, PreviewKeyDown on the WebView and the IMessageFilter fallback.
