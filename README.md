@@ -6,12 +6,18 @@ Inspired by its predecesor [cwc/web-page-screensaver](https://github.com/cwc/web
 
 ## Binaries
 
-Version|32-bit|64-bit
----|---|---
-| 2.0.2-Alpha | Download | Download |
- _Due to 10MB size limit by GitHub (the generated files are ~130MB), need to find an alternative way to publish these._
+Version|64-bit
+---|---
+| build [`8b32c19`](https://github.com/david-coneff/WebPageScreensaver/commit/8b32c19) | [Download](https://github.com/david-coneff/WebPageScreensaver/releases/tag/build-8b32c19) |
 
-_Workaround: Follow the [debugging instructions](#Debugging) and generate the files yourself._
+Self-contained single-file build (~130MB) — no separate .NET runtime install needed.
+Published as a [GitHub Release](https://github.com/david-coneff/WebPageScreensaver/releases)
+rather than committed in-tree: the file is well over GitHub's 100MB plain-blob limit, and
+this is a fork, which GitHub does not allow pushing new Git LFS objects to (storage quota
+is billed against the upstream repo owner). Built cross-compiled and never run or tested —
+see the release notes for exactly how, and the [debugging instructions](#Debugging) if you'd
+rather build (and verify) it yourself on a real Windows machine. No 32-bit build is published;
+build one yourself via `PublishX86.pubxml` if you need it.
 
 
 ## Installation instructions
@@ -51,8 +57,11 @@ Whether you are just installing it or building it, you need the following depend
 * The WinForms theme does not look nice in the published single-file binary. It looks fine when debugging or when building normally (not publishing). It may be caused by the trimming process, which removes what it thinks are unnecessary UI dependencies.
 * After installing the *.scr, it's not possible to open the Settings window directly from the Windows Screen Saver Settings button. The workaround is to open the settings by directly double clicking on the *.scr file and configuring the screen saver from there.
 * Close on mouse movement does not work because Edge is capturing the mouse movement events, preventing the screensaver from detecting them. The workaround is to press the Esc key.
-* Publishing does not yet convert the generated *.exe to *.scr. The extension needs to be changed manually.
-* Can't host the final *.scr files in GitHub due to the large size. Workaround is to build it yourself.
+* ~~Publishing does not yet convert the generated *.exe to *.scr.~~ Fixed in `8b32c19` — the
+  PostBuild copy now runs on `dotnet publish` too, not just `dotnet build`.
+* ~~Can't host the final *.scr files in GitHub due to the large size.~~ Published as a
+  [GitHub Release](https://github.com/david-coneff/WebPageScreensaver/releases) instead — see
+  [Binaries](#binaries).
 
 ## Contributing
 
