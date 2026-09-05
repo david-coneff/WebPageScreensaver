@@ -27,6 +27,8 @@ namespace WebPageScreensaver
         private readonly int _rotationInterval;
         private readonly bool _shuffle;
         private readonly List<string> _urls;
+        private readonly double _zoomFactor;
+        private readonly HashSet<string> _allowedHosts;
         private readonly Size _savedSize;
         private readonly Point _savedLocation;
 
@@ -38,6 +40,15 @@ namespace WebPageScreensaver
             _rotationInterval = screen.RotationInterval;
             _shuffle = screen.Shuffle;
             _urls = screen.URLs.ToList();
+            _zoomFactor = screen.ZoomPercent / 100.0;
+            _allowedHosts = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (string url in _urls)
+            {
+                if (Uri.TryCreate(url, UriKind.Absolute, out Uri? parsed))
+                {
+                    _allowedHosts.Add(parsed.Host);
+                }
+            }
 
             _savedSize = new Size(screen.Bounds.Width, screen.Bounds.Height);
             _savedLocation = new Point(screen.Bounds.Left, screen.Bounds.Top);
@@ -126,6 +137,17 @@ namespace WebPageScreensaver
             }
 
             await _webBrowser.EnsureCoreWebView2Async(environment);
+
+            HardenForUnattendedDisplay(_webBrowser.CoreWebView2);
+
+            // Applied here for the FIRST navigation, and again in NavigationCompleted below:
+            // Chromium remembers a per-origin zoom level in the profile itself, which — now that
+            // this app shares one persistent profile across every launch (WebView2Session) — can
+            // silently override a bare one-time assignment the next time a page from that origin
+            // loads. Re-asserting it after every navigation is what makes the configured default
+            // actually stick rather than just applying "most of the time".
+            _webBrowser.ZoomFactor = _zoomFactor;
+            _webBrowser.CoreWebView2.NavigationCompleted += (s, e) => _webBrowser.ZoomFactor = _zoomFactor;
 
             // Note: do not use CoreWebView2.AcceleratorKeyPressed (may not be available in this SDK).
             // We rely on form KeyPreview, PreviewKeyDown on the WebView and the IMessageFilter fallback.
@@ -267,6 +289,65 @@ namespace WebPageScreensaver
         {
             _webBrowser.Visible = true;
             _webBrowser.CoreWebView2.Navigate(url);
+        }
+
+        /// <summary>
+        /// Restricts what an unattended, non-interactive display can be made to do. A screensaver
+        /// is shown to whoever is physically at the machine, logged-in user or not, and Chromium's
+        /// default browser surface is much larger than "render a page": disabled here are all the
+        /// paths that would otherwise pop a native, Explorer-shell-backed dialog (Save As, Print's
+        /// "Microsoft Print to PDF" file picker, an Open File picker) or hand a passerby a second,
+        /// uncontrolled window or a JS console. None of these restrictions apply to LoginForm —
+        /// reaching that window already requires an authenticated, unlocked desktop, so it grants
+        /// no new privilege a normal browser wouldn't.
+        /// </summary>
+        private void HardenForUnattendedDisplay(Microsoft.Web.WebView2.Core.CoreWebView2 core)
+        {
+            core.Settings.AreDefaultContextMenusEnabled = false;   // no "Save image as", "Inspect", "View source"
+            core.Settings.AreDevToolsEnabled = false;              // no F12 / Ctrl+Shift+I console
+            core.Settings.AreBrowserAcceleratorKeysEnabled = false; // no Ctrl+P, Ctrl+S, Ctrl+O, Ctrl+F, F5, F12, ...
+            core.Settings.IsZoomControlEnabled = false;            // the configured zoom is authoritative; no accidental drift
+
+            // Any window.open() / target="_blank" is redirected into THIS window instead of
+            // spawning a second, unrestricted one — a fresh popup would not inherit the settings
+            // above, and there is no legitimate reason for a second visible window to exist here.
+            core.NewWindowRequested += (s, e) =>
+            {
+                e.Handled = true;
+                if (!string.IsNullOrEmpty(e.Uri))
+                {
+                    core.Navigate(e.Uri);
+                }
+            };
+
+            // A screensaver never legitimately needs to write a file to disk.
+            core.DownloadStarting += (s, e) => e.Cancel = true;
+
+            // Keep the TOP-LEVEL page on one of the configured screen's own hosts (or a subdomain
+            // of one). This is deliberately approximate — it allows any subdomain of a configured
+            // host rather than resolving true registrable domains (e.g. it would also allow
+            // "evil.co.uk" if "example.co.uk" were configured), which would need a public-suffix
+            // list this app doesn't carry — but it closes the main risk (a redirect or a clicked
+            // link taking the unattended display to attacker-controlled content entirely) without
+            // an external dependency. It does not apply to sub-resources or iframes within an
+            // allowed page, only to navigation of the page itself.
+            core.NavigationStarting += (s, e) =>
+            {
+                if (e.Uri == "about:blank" || !Uri.TryCreate(e.Uri, UriKind.Absolute, out Uri? target))
+                {
+                    return;
+                }
+
+                bool allowed = _allowedHosts.Any(host =>
+                    string.Equals(target.Host, host, StringComparison.OrdinalIgnoreCase) ||
+                    target.Host.EndsWith("." + host, StringComparison.OrdinalIgnoreCase));
+
+                if (!allowed)
+                {
+                    e.Cancel = true;
+                    Debug.WriteLine($"WebPageScreensaver: blocked navigation to disallowed host '{target.Host}'");
+                }
+            };
         }
 
         private void WebBrowser_MouseMove(object sender, EventArgs e)

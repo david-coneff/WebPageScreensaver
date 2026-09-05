@@ -41,6 +41,21 @@ namespace WebPageScreensaver
             // is typing credentials into whatever page is currently shown.
             _webView.CoreWebView2.SourceChanged += (sourceSender, sourceArgs) =>
                 _textBoxAddress.Text = _webView.Source?.ToString() ?? string.Empty;
+
+            // Unlike ScreensaverForm, this window is not locked down — reaching it already
+            // requires an authenticated, unlocked desktop, and login flows legitimately need
+            // normal browsing (cross-domain OAuth redirects, printing a confirmation, downloading
+            // 2FA backup codes). The one thing still worth doing here: redirect same-window
+            // instead of letting a page spawn an uncontrolled second window.
+            _webView.CoreWebView2.NewWindowRequested += (newWindowSender, newWindowArgs) =>
+            {
+                newWindowArgs.Handled = true;
+                if (!string.IsNullOrEmpty(newWindowArgs.Uri))
+                {
+                    _webView.CoreWebView2.Navigate(newWindowArgs.Uri);
+                }
+            };
+
             Navigate();
         }
 
