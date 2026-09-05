@@ -68,15 +68,25 @@ namespace WebPageScreensaver
         /// </summary>
         private static void ShowScreenSaver()
         {
-            var forms = new List<Form>();
-
-            foreach ((int _, ScreenInformation info) in Preferences.Screens)
+            // Scoped to the whole /s process, not per-monitor form: one disable/restore pair
+            // covers every ScreensaverForm regardless of how many screens are attached.
+            AccessibilityShortcuts.Disable();
+            try
             {
-                var form = new ScreensaverForm(info);
-                forms.Add(form);
-            }
+                var forms = new List<Form>();
 
-            Application.Run(new MultiFormContext(forms));
+                foreach ((int _, ScreenInformation info) in Preferences.Screens)
+                {
+                    var form = new ScreensaverForm(info);
+                    forms.Add(form);
+                }
+
+                Application.Run(new MultiFormContext(forms));
+            }
+            finally
+            {
+                AccessibilityShortcuts.Restore();
+            }
         }
     }
 }
