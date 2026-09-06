@@ -4,7 +4,7 @@
   "protocol_url": "https://github.com/david-coneff/rhizome-protocol.git",
   "protocol_path": "../rhizome-protocol",
   "protocol_ref": "tools-stable",
-  "protocol_sha": "f6bcd8daceccb908371be5a48fb75dc5437c7797",
+  "protocol_sha": "020cebfa6868c84636a65c9aff9fe1a1365bd55e",
   "memory_name": "WebPageScreensaver-memory",
   "memory_url": "https://github.com/david-coneff/WebPageScreensaver-memory.git",
   "memory_path": "../WebPageScreensaver-memory"
