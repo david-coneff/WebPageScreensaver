@@ -44,11 +44,16 @@
             this._checkBoxCloseOnMouseMovement = new System.Windows.Forms.CheckBox();
             this._labelMultiScreen = new System.Windows.Forms.Label();
             this._flowLayoutPanelMultiScreenMode = new System.Windows.Forms.FlowLayoutPanel();
+            this._menuStripMain = new System.Windows.Forms.MenuStrip();
+            this._toolStripMenuItemFile = new System.Windows.Forms.ToolStripMenuItem();
+            this._toolStripMenuItemExportSettings = new System.Windows.Forms.ToolStripMenuItem();
+            this._toolStripMenuItemImportSettings = new System.Windows.Forms.ToolStripMenuItem();
             this._tabControlScreens.SuspendLayout();
             this._tableLayoutPanelMain.SuspendLayout();
             this._tableLayoutPanelMainBottom.SuspendLayout();
             this._tableLayoutPanelMainTop.SuspendLayout();
             this._flowLayoutPanelMultiScreenMode.SuspendLayout();
+            this._menuStripMain.SuspendLayout();
             this.SuspendLayout();
             // 
             // _linkLabelProjectURL
@@ -291,12 +296,47 @@
             this._flowLayoutPanelMultiScreenMode.Name = "_flowLayoutPanelMultiScreenMode";
             this._flowLayoutPanelMultiScreenMode.Size = new System.Drawing.Size(274, 33);
             // 
+            // _menuStripMain
+            // 
+            this._menuStripMain.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this._toolStripMenuItemFile});
+            this._menuStripMain.Location = new System.Drawing.Point(0, 0);
+            this._menuStripMain.Name = "_menuStripMain";
+            this._menuStripMain.Size = new System.Drawing.Size(464, 24);
+            this._menuStripMain.TabIndex = 17;
+            this._menuStripMain.Text = "_menuStripMain";
+            // 
+            // _toolStripMenuItemFile
+            // 
+            this._toolStripMenuItemFile.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this._toolStripMenuItemExportSettings,
+            this._toolStripMenuItemImportSettings});
+            this._toolStripMenuItemFile.Name = "_toolStripMenuItemFile";
+            this._toolStripMenuItemFile.Size = new System.Drawing.Size(37, 20);
+            this._toolStripMenuItemFile.Text = "&File";
+            // 
+            // _toolStripMenuItemExportSettings
+            // 
+            this._toolStripMenuItemExportSettings.Name = "_toolStripMenuItemExportSettings";
+            this._toolStripMenuItemExportSettings.Size = new System.Drawing.Size(180, 22);
+            this._toolStripMenuItemExportSettings.Text = "&Export Settings...";
+            this._toolStripMenuItemExportSettings.Click += new System.EventHandler(this.ToolStripMenuItemExportSettings_Click);
+            // 
+            // _toolStripMenuItemImportSettings
+            // 
+            this._toolStripMenuItemImportSettings.Name = "_toolStripMenuItemImportSettings";
+            this._toolStripMenuItemImportSettings.Size = new System.Drawing.Size(180, 22);
+            this._toolStripMenuItemImportSettings.Text = "&Import Settings...";
+            this._toolStripMenuItemImportSettings.Click += new System.EventHandler(this.ToolStripMenuItemImportSettings_Click);
+            // 
             // PreferencesForm
             // 
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.ClientSize = new System.Drawing.Size(464, 361);
+            this.ClientSize = new System.Drawing.Size(464, 385);
             this.Controls.Add(this._tableLayoutPanelMain);
+            this.Controls.Add(this._menuStripMain);
+            this.MainMenuStrip = this._menuStripMain;
             this.Margin = new System.Windows.Forms.Padding(6, 7, 6, 7);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
@@ -314,6 +354,8 @@
             this._tableLayoutPanelMainTop.PerformLayout();
             this._flowLayoutPanelMultiScreenMode.ResumeLayout(false);
             this._flowLayoutPanelMultiScreenMode.PerformLayout();
+            this._menuStripMain.ResumeLayout(false);
+            this._menuStripMain.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -339,6 +381,11 @@
         private System.Windows.Forms.Button _buttonOK;
         private System.Windows.Forms.Button _buttonLogIn;
         private System.Windows.Forms.FlowLayoutPanel _flowLayoutPanelMultiScreenMode;
+
+        private System.Windows.Forms.MenuStrip _menuStripMain;
+        private System.Windows.Forms.ToolStripMenuItem _toolStripMenuItemFile;
+        private System.Windows.Forms.ToolStripMenuItem _toolStripMenuItemExportSettings;
+        private System.Windows.Forms.ToolStripMenuItem _toolStripMenuItemImportSettings;
 
         private System.ComponentModel.IContainer components;
     }
