@@ -24,34 +24,36 @@ namespace WebPageScreensaver
 
             // Argument verification:
             // - The arguments /C, /P and /S are required by Windows Control Panel.
-            // - More than 1 argument, or passing the wrong argument, will exit the program
+            // - Windows' own "Screen Saver Settings" dialog invokes the Settings... button with
+            //   a parent window handle attached to the verb -- historically as "/c:1234567" (one
+            //   token) or as two separate tokens ("/c" "1234567") depending on the Windows
+            //   version/invocation path. This app does not embed itself as a child of that handle
+            //   (that would need Win32 SetParent/WS_CHILD interop, out of scope here), but it must
+            //   still recognize the verb -- an exact whole-argument match on "/C" alone silently
+            //   missed both real forms, which is the documented "Settings button does nothing"
+            //   issue in this project's README. Matching by PREFIX on args[0] and ignoring any
+            //   handle that follows (attached or a separate second argument) fixes that.
 
             // Passing no arguments is interpreted as using "/C"
-            switch (args.Length)
+            if (args.Length == 0)
             {
-                case 0:
-                    ShowPreferences();
-                    break;
+                ShowPreferences();
+                return;
+            }
 
-                case 1:
-                    switch (args[0].ToUpperInvariant())
-                    {
-                        case "/C": // Configure
-                            ShowPreferences();
-                            break;
-                        case "/P": // Preview
-                        case "/S": // Show
-                            ShowScreenSaver();
-                            break;
-                        default:
-                            Console.WriteLine($"Unrecognized argument: {args[0]}");
-                            break;
-                    }
-                    break;
-
-                default:
-                    Console.WriteLine("Unexpected number of arguments.");
-                    break;
+            string verb = args[0];
+            if (verb.StartsWith("/C", StringComparison.OrdinalIgnoreCase)) // Configure
+            {
+                ShowPreferences();
+            }
+            else if (verb.StartsWith("/P", StringComparison.OrdinalIgnoreCase) // Preview
+                || verb.StartsWith("/S", StringComparison.OrdinalIgnoreCase)) // Show
+            {
+                ShowScreenSaver();
+            }
+            else
+            {
+                Console.WriteLine($"Unrecognized argument: {verb}");
             }
         }
 

@@ -150,6 +150,94 @@ namespace WebPageScreensaver
         }
 
         /// <summary>
+        /// Exports every setting under HKCU\Software\WebPageScreensaver to a .reg file the user
+        /// picks. Does not include the WebView2 login/session state -- see ConfigurationBackup.
+        /// </summary>
+        private void ToolStripMenuItemExportSettings_Click(object sender, EventArgs e)
+        {
+            using SaveFileDialog saveFileDialog = new SaveFileDialog()
+            {
+                Title = "Export Settings",
+                Filter = "Registry files (*.reg)|*.reg|All files (*.*)|*.*",
+                DefaultExt = "reg",
+                AddExtension = true,
+                FileName = "WebPageScreensaver.reg",
+            };
+
+            if (saveFileDialog.ShowDialog(this) != DialogResult.OK)
+            {
+                return;
+            }
+
+            try
+            {
+                ConfigurationBackup.Export(saveFileDialog.FileName);
+                MessageBox.Show(
+                    this,
+                    "Settings exported successfully." + Environment.NewLine + Environment.NewLine +
+                    "Note: this does not include your logged-in session (cookies, etc.), which is " +
+                    "stored separately in the WebView2 browser profile and is not exported.",
+                    "Export Settings",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    this,
+                    "Could not export settings." + Environment.NewLine + Environment.NewLine + ex.Message,
+                    "Export Settings Failed",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
+        }
+
+        /// <summary>
+        /// Imports settings from a .reg file the user picks back into the registry. Does not
+        /// restore the WebView2 login/session state -- see ConfigurationBackup.
+        /// </summary>
+        private void ToolStripMenuItemImportSettings_Click(object sender, EventArgs e)
+        {
+            using OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Import Settings",
+                Filter = "Registry files (*.reg)|*.reg|All files (*.*)|*.*",
+                DefaultExt = "reg",
+                CheckFileExists = true,
+            };
+
+            if (openFileDialog.ShowDialog(this) != DialogResult.OK)
+            {
+                return;
+            }
+
+            try
+            {
+                ConfigurationBackup.Import(openFileDialog.FileName);
+                MessageBox.Show(
+                    this,
+                    "Settings imported successfully." + Environment.NewLine + Environment.NewLine +
+                    "Close and reopen this Settings window to see the imported values: the controls " +
+                    "already on screen were only populated once, when this window opened, and will " +
+                    "not refresh on their own." + Environment.NewLine + Environment.NewLine +
+                    "Note: this does not restore your logged-in session (cookies, etc.), which is " +
+                    "stored separately in the WebView2 browser profile and is not part of this import.",
+                    "Import Settings",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    this,
+                    "Could not import settings." + Environment.NewLine + Environment.NewLine + ex.Message,
+                    "Import Settings Failed",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
+        }
+
+        /// <summary>
         /// Read the data from the form and save it in the registry.
         /// </summary>
         private void Save()
