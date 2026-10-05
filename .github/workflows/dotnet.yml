@@ -2,7 +2,10 @@ name: .NET
 
 on:
   push:
-    branches: [ master, rhiz-working-bracken ]
+    # The working layers are named by glob, not by exact name: GitHub matches branch
+    # filters exactly, so naming one stream branch left the streamless trunk
+    # (rhiz-working) and any other stream unbuilt. master is the promoted clean branch.
+    branches: [ master, "rhiz-working*" ]
   pull_request:
     branches: [ master ]
 
