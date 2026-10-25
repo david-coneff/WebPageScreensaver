@@ -321,7 +321,7 @@ def _run(args) -> int:
 # lists in step when one of them cannot import the other.
 HOOK_ADAPTERS = ("distill-nudge", "census-nudge", "sync-nudge", "rollup-read-guard",
                  "generated-write-guard", "subagent-durability", "change-guard",
-                 "lesson-recall")
+                 "lesson-recall", "tier-nudge")
 HOOK_REL = Path("protocol") / "hooks" / "claude-code"
 
 
@@ -535,6 +535,15 @@ def main() -> int:
             return 2
         return _run([py, str(linker), "--root", str(R), *rest])
     if sub == "self-update":
+        # IT TAKES NO ARGUMENTS, AND A HELP REQUEST MUST NOT PERFORM IT (`pando-0151`). This
+        # branch never read `rest`, so `rhiz self-update --help` overwrote tools/rhiz.py.
+        if rest:
+            asked = set(rest) <= {"-h", "--help"}
+            print("usage: rhiz self-update   (no arguments) — overwrite this repo's "
+                  "tools/rhiz.py with the channel's canonical bootstrap"
+                  + ("" if asked else f". Unexpected: {' '.join(rest)}; nothing was written."),
+                  file=sys.stdout if asked else sys.stderr)
+            return 0 if asked else 2
         src, dst = R / "tools" / "rhiz.py", root / "tools" / "rhiz.py"
         if src.resolve() == dst.resolve():
             print("self-update skipped: this IS the canonical bootstrap")
