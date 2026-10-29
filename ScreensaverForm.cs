@@ -160,6 +160,9 @@ namespace WebPageScreensaver
                 await _webBrowser.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(
                     "document.addEventListener('keydown', function(e) { if (e.key === 'Escape') { window.chrome.webview.postMessage('escape'); } }, true);");
 
+                // Awaited here, before the first navigation below, so no page runs before it.
+                await _webBrowser.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(NoNativeDialogsScript);
+
                 _webBrowser.CoreWebView2.WebMessageReceived += CoreWebView2_WebMessageReceived;
             }
             catch
@@ -301,6 +304,32 @@ namespace WebPageScreensaver
         /// reaching that window already requires an authenticated, unlocked desktop, so it grants
         /// no new privilege a normal browser wouldn't.
         /// </summary>
+        /// <summary>
+        /// Injected into every document (see the Escape script's registration): closes the
+        /// native-dialog paths a PAGE can open by itself, which no WebView2 setting covers.
+        /// Checked 2026-10-29 against the SDK reference at 1.0.4314.35: CoreWebView2Settings has
+        /// no printing or file-picker switch, and disabling accelerator keys stops Ctrl+P but not
+        /// a script's window.print(), whose "Microsoft Print to PDF" Save dialog is a file-system
+        /// escape. So: window.print becomes a no-op; the File System Access pickers
+        /// (showOpenFilePicker / showSaveFilePicker / showDirectoryPicker) reject; a file input's
+        /// showPicker() does nothing; and a click on an &lt;input type="file"&gt; (a user's, a
+        /// label's, or a script's input.click()) is cancelled in the capture phase.
+        /// Best effort, page-level only: a script cannot reach a cross-origin frame the injection
+        /// misses, so the gap note in unattended-display-hardening.md stays, narrowed.
+        /// </summary>
+        private const string NoNativeDialogsScript =
+            "(function () {" +
+            "  try { window.print = function () {}; } catch (e) {}" +
+            "  ['showOpenFilePicker', 'showSaveFilePicker', 'showDirectoryPicker'].forEach(function (n) {" +
+            "    try { if (n in window) { window[n] = function () { return Promise.reject(new DOMException('Disabled on an unattended display', 'AbortError')); }; } } catch (e) {}" +
+            "  });" +
+            "  try { var sp = HTMLInputElement.prototype.showPicker; if (sp) { HTMLInputElement.prototype.showPicker = function () { if (String(this.type).toLowerCase() === 'file') { return; } return sp.apply(this, arguments); }; } } catch (e) {}" +
+            "  document.addEventListener('click', function (e) {" +
+            "    var t = e.target;" +
+            "    if (t && t.tagName === 'INPUT' && String(t.type).toLowerCase() === 'file') { e.preventDefault(); e.stopImmediatePropagation(); }" +
+            "  }, true);" +
+            "})();";
+
         private void HardenForUnattendedDisplay(Microsoft.Web.WebView2.Core.CoreWebView2 core)
         {
             core.Settings.AreDefaultContextMenusEnabled = false;   // no "Save image as", "Inspect", "View source"
