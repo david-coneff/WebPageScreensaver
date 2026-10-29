@@ -110,7 +110,7 @@ Issues and PRs are welcome.
 * Install the [dependencies](#Dependencies).
 * Clone the repo.
 * Build with `dotnet build`.
-* To debug from Visual Studio, edit the [launchSettings.json](Properties/launch.json) file and set the `"commandLineArgs"` value to:
+* To debug from Visual Studio, edit the [launchSettings.json](Properties/launchSettings.json) file and set the `"commandLineArgs"` value to:
   * `"/p"` if you want to debug the screensaver itself.
   * `"/c"` if you want to debug the settings window.
 * Generate a single *.exe by publishing the project using the *.pubxml files in the `Properties/PublishProfiles` folder. Then rename the *.exe to *.scr.

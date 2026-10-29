@@ -1,0 +1,13 @@
+{
+  "_generated": "known-orphan registry",
+  "orphans": [
+    {
+      "path": "AI-ASSISTED-DEVELOPMENT.md",
+      "reason": "reached directly by anyone landing on rhiz-working, not through a reading graph — documents the two-branch working/clean model (rhiz-child-repo-convention.md#5.5) and is itself stripped from master by .rhiz-artifacts.json, so it has no attachment point on either branch"
+    },
+    {
+      "path": "LICENSE.md",
+      "reason": "the license, read where hosts and tools look for it (the repo root), not through a reading graph"
+    }
+  ]
+}
