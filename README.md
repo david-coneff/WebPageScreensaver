@@ -64,11 +64,19 @@ gaps: [WebPageScreensaver-memory:state/unattended-display-hardening.md](https://
 
 ## Dependencies
 
-Whether you are just installing it or building it, you need the following dependencies:
+To run the released build you need:
 
-* .NET 5.0 (>= Preview 8) Desktop Runtime for Windows: https://dotnet.microsoft.com/download/dotnet/5.0
-* Microsoft Edge Insider (Canary): https://www.microsoftedgeinsider.com/en-us/download/
-* Windows 10.
+* Windows 10 or 11.
+* The Microsoft Edge WebView2 Runtime (Evergreen). It ships with Windows 11 and current
+  Windows 10, so there is normally nothing to install; if it is missing, get it from
+  https://developer.microsoft.com/microsoft-edge/webview2/. The app uses whatever Evergreen
+  runtime is installed (`WebView2Session.cs` passes no fixed browser folder), so no Edge
+  Insider/Canary channel is needed.
+
+No .NET runtime install is needed: the release is self-contained.
+
+To build it you also need a .NET SDK that can target `net5.0-windows` (the project's
+`TargetFramework`).
 
 ## Fixes and improvements
 
