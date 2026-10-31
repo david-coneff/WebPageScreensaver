@@ -92,7 +92,7 @@ To build it you also need a .NET SDK that can target `net5.0-windows` (the proje
 
 ### 2.0.1-Alpha
 
-* The WinForms theme does not look nice in the published single-file binary. It looks fine when debugging or when building normally (not publishing). It may be caused by the trimming process, which removes what it thinks are unnecessary UI dependencies.
+* The WinForms theme does not look nice in the published single-file binary. It looks fine when debugging or when building normally (not publishing). It may be caused by the trimming process, which removes what it thinks are unnecessary UI dependencies. Trimming is now off in the project and both publish profiles; whether that fixes the theme has not been checked on Windows.
 * After installing the *.scr, it's not possible to open the Settings window directly from the Windows Screen Saver Settings button. The workaround is to open the settings by directly double clicking on the *.scr file and configuring the screen saver from there.
 * Close on mouse movement does not work because Edge is capturing the mouse movement events, preventing the screensaver from detecting them. The workaround is to press the Esc key.
 * ~~Publishing does not yet convert the generated *.exe to *.scr.~~ Fixed in `8b32c19` — the
@@ -113,4 +113,10 @@ Issues and PRs are welcome.
 * To debug from Visual Studio, edit the [launchSettings.json](Properties/launchSettings.json) file and set the `"commandLineArgs"` value to:
   * `"/p"` if you want to debug the screensaver itself.
   * `"/c"` if you want to debug the settings window.
-* Generate a single *.exe by publishing the project using the *.pubxml files in the `Properties/PublishProfiles` folder. Then rename the *.exe to *.scr.
+* Generate the single-file *.scr by publishing with a profile from `Properties/PublishProfiles`; the publish also writes the *.scr next to the *.exe. This is the command the release is built with:
+
+  ```
+  dotnet publish -c Release -p:PublishProfile=PublishX64
+  ```
+
+  Both profiles and the project agree: self-contained, single-file, `net5.0-windows`, no trimming (Windows Forms does not support it) and no ReadyToRun (it only shortens startup and adds size). Use `PublishX86` for a 32-bit build.

@@ -9,7 +9,14 @@
     <RootNamespace>WebPageScreensaver</RootNamespace>
     <AssemblyName>WebPageScreensaver</AssemblyName>
     <Version>2.0.2-Alpha</Version>
+    <!-- Publish choices, kept identical in both Properties/PublishProfiles/*.pubxml and the
+         release command in README.md:
+         - PublishTrimmed false: trimming is not supported for Windows Forms (50ecb57), and a
+           trimmed publish is the suspected cause of the broken theme in README's known issues.
+         - PublishReadyToRun false: ReadyToRun only shortens startup, which a long-running
+           screensaver rarely pays, and it adds size; the published release is built without it. -->
     <PublishTrimmed>false</PublishTrimmed>
+    <PublishReadyToRun>false</PublishReadyToRun>
     <PublishReadyToRunShowWarnings>true</PublishReadyToRunShowWarnings>
     <Platforms>x64;x86</Platforms>
 	<InvariantGlobalization>false</InvariantGlobalization>
