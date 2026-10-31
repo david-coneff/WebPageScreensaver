@@ -111,7 +111,8 @@ Issues and PRs are welcome.
 * Clone the repo.
 * Build with `dotnet build`.
 * To debug from Visual Studio, edit the [launchSettings.json](Properties/launchSettings.json) file and set the `"commandLineArgs"` value to:
-  * `"/p"` if you want to debug the screensaver itself.
+  * `"/s"` if you want to debug the screensaver itself.
+  * `"/p <hwnd>"` to debug the Screen Saver Settings preview: Windows passes the handle of the dialog's little monitor picture, and the app draws a placeholder inside it. Without a handle `/p` exits.
   * `"/c"` if you want to debug the settings window.
 * Generate the single-file *.scr by publishing with a profile from `Properties/PublishProfiles`; the publish also writes the *.scr next to the *.exe. This is the command the release is built with:
 
