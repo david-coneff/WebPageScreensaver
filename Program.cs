@@ -46,8 +46,18 @@ namespace WebPageScreensaver
             {
                 ShowPreferences();
             }
-            else if (verb.StartsWith("/P", StringComparison.OrdinalIgnoreCase) // Preview
-                || verb.StartsWith("/S", StringComparison.OrdinalIgnoreCase)) // Show
+            else if (verb.StartsWith("/P", StringComparison.OrdinalIgnoreCase)) // Preview
+            {
+                // Windows passes the settings dialog's preview window as "/p <hwnd>" (or
+                // attached, "/p:<hwnd>"): draw a placeholder inside it. Without a usable
+                // handle there is nothing to preview into, so exit rather than go full-screen.
+                IntPtr parent = ParseWindowHandle(verb, args);
+                if (PreviewForm.IsUsableParent(parent))
+                {
+                    Application.Run(new PreviewForm(parent));
+                }
+            }
+            else if (verb.StartsWith("/S", StringComparison.OrdinalIgnoreCase)) // Show
             {
                 ShowScreenSaver();
             }
@@ -55,6 +65,16 @@ namespace WebPageScreensaver
             {
                 Console.WriteLine($"Unrecognized argument: {verb}");
             }
+        }
+
+        /// <summary>
+        /// The window handle that follows a verb: attached ("/p:1234", "/p1234") or as the
+        /// next argument ("/p" "1234"). Zero when there is none or it does not parse.
+        /// </summary>
+        internal static IntPtr ParseWindowHandle(string verb, string[] args)
+        {
+            string text = verb.Length > 2 ? verb.Substring(2).TrimStart(':') : (args.Length > 1 ? args[1] : "");
+            return long.TryParse(text, out long value) && value > 0 ? new IntPtr(value) : IntPtr.Zero;
         }
 
         /// <summary>
