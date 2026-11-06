@@ -16,17 +16,12 @@ namespace WebPageScreensaver
 
         [DllImport("user32.dll", SetLastError = true)]
         private static extern bool UnregisterHotKey(IntPtr hWnd, int id);
-        private int _currentURLIndex;
-
-        private readonly Timer _timer;
         // Timer that hides the cursor after a period of inactivity
         private readonly Timer _idleTimer;
         private const int IdleTimeoutMs = 5 * 60 * 1000; // 5 minutes
         private InputActivityMessageFilter _activityFilter;
         private readonly bool _closeOnMouseMovement;
-        private readonly int _rotationInterval;
-        private readonly bool _shuffle;
-        private readonly List<string> _urls;
+        private readonly string _url;
         private readonly double _zoomFactor;
         private readonly HashSet<string> _allowedHosts;
         private readonly Size _savedSize;
@@ -34,20 +29,13 @@ namespace WebPageScreensaver
 
         public ScreensaverForm(ScreenInformation screen)
         {
-            _currentURLIndex = 0;
-
             _closeOnMouseMovement = Preferences.CloseOnMouseMovement;
-            _rotationInterval = screen.RotationInterval;
-            _shuffle = screen.Shuffle;
-            _urls = screen.URLs.ToList();
+            _url = screen.URL;
             _zoomFactor = screen.ZoomPercent / 100.0;
             _allowedHosts = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            foreach (string url in _urls)
+            if (Uri.TryCreate(_url, UriKind.Absolute, out Uri? parsed))
             {
-                if (Uri.TryCreate(url, UriKind.Absolute, out Uri? parsed))
-                {
-                    _allowedHosts.Add(parsed.Host);
-                }
+                _allowedHosts.Add(parsed.Host);
             }
 
             _savedSize = new Size(screen.Bounds.Width, screen.Bounds.Height);
@@ -67,8 +55,6 @@ namespace WebPageScreensaver
             this.ClientSize = _savedSize;
             this.Location = _savedLocation;
             this.ResumeLayout(false);
-
-            _timer = new Timer();
 
             // Idle timer: hide cursor after IdleTimeoutMs of no user activity
             _idleTimer = new Timer();
@@ -174,27 +160,9 @@ namespace WebPageScreensaver
             // consumes keyboard input. We register it with no modifiers.
             RegisterHotKey(this.Handle, HOTKEY_ID, 0, (uint)Keys.Escape);
 
-            if (_urls.Any())
+            if (!string.IsNullOrEmpty(_url))
             {
-                if (_shuffle)
-                {
-                    Random random = new Random();
-                    int n = _urls.Count;
-                    while (n > 1)
-                    {
-                        n--;
-                        int k = random.Next(n + 1);
-                        var value = _urls[k];
-                        _urls[k] = _urls[n];
-                        _urls[n] = value;
-                    }
-                }
-
-                _timer.Interval = _rotationInterval * 1000;
-                _timer.Tick += (s, ee) => RotateSite();
-                _timer.Start();
-
-                RotateSite(); // First call, second one will be done _rotationInterval seconds later by _timer
+                BrowseTo(_url);
             }
             else
             {
@@ -249,7 +217,6 @@ namespace WebPageScreensaver
             try
             {
                 // Ensure timers are stopped and message filter removed
-                _timer?.Stop();
                 _idleTimer?.Stop();
                 if (_activityFilter != null)
                 {
@@ -276,16 +243,6 @@ namespace WebPageScreensaver
                 // Make sure cursor is visible when exiting
                 Cursor.Show();
             }
-        }
-
-        private void RotateSite()
-        {
-            if (_currentURLIndex >= _urls.Count)
-            {
-                _currentURLIndex = 0;
-            }
-            BrowseTo(_urls[_currentURLIndex]);
-            _currentURLIndex++;
         }
 
         private void BrowseTo(string url)

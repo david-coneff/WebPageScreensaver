@@ -95,7 +95,7 @@ namespace WebPageScreensaver
         {
             try
             {
-                return Preferences.Screens.Values.SelectMany(s => s.URLs).FirstOrDefault(u => !string.IsNullOrWhiteSpace(u)) ?? "(no URL set)";
+                return Preferences.Screens.Values.Select(s => s.URL).FirstOrDefault(u => !string.IsNullOrWhiteSpace(u)) ?? "(no URL set)";
             }
             catch (Exception)
             {

@@ -86,13 +86,7 @@ namespace WebPageScreensaver
 
                 ScreenInformation currentScreen = Preferences.Screens[tabNumber];
 
-                foreach (string url in currentScreen.URLs)
-                {
-                    currentUserControl._listViewURLs.Items.Add(url);
-                }
-
-                currentUserControl._numericUpDownRotationInterval.Value = currentScreen.RotationInterval;
-                currentUserControl._checkBoxShuffle.Checked = currentScreen.Shuffle;
+                currentUserControl._textBoxURL.Text = currentScreen.URL;
                 currentUserControl._numericUpDownZoomPercent.Value = currentScreen.ZoomPercent;
 
                 tab.Controls.Add(currentUserControl);
@@ -140,9 +134,9 @@ namespace WebPageScreensaver
         {
             string initialUrl = string.Empty;
             if (_tabControlScreens.SelectedTab?.Controls[0] is PrefsByScreenUserControl userControl
-                && userControl._listViewURLs.Items.Count > 0)
+                && !string.IsNullOrWhiteSpace(userControl._textBoxURL.Text))
             {
-                initialUrl = userControl._listViewURLs.Items[0].Text;
+                initialUrl = userControl._textBoxURL.Text.Trim();
             }
 
             using LoginForm loginForm = new LoginForm(initialUrl);
