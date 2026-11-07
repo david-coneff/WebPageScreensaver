@@ -11,8 +11,10 @@ namespace WebPageScreensaver
     ///
     /// Scope: this covers everything under HKEY_CURRENT_USER\Software\WebPageScreensaver -- i.e.
     /// every value read/written by <see cref="Preferences"/> and <see cref="ScreenInformation"/>:
-    /// CloseOnMouseMovement, MultiScreenMode, and each DisplayN subkey's URLs, IntervalRotation,
-    /// Shuffle, and ZoomPercent.
+    /// CloseOnMouseMovement, MultiScreenMode, and each DisplayN subkey's URLs and ZoomPercent. A backup
+    /// made before rotation was removed also carries a space-separated URL list and the old
+    /// IntervalRotation and Shuffle values: it imports as is, <see cref="ScreenInformation.URL"/> reads
+    /// the list's first entry, and the next save of the preferences deletes the two old values.
     ///
     /// OUT OF SCOPE, deliberately: login/session state. That lives separately, in the WebView2
     /// browser profile directory (%LocalAppData%\WebPageScreensaver\WebView2Profile -- cookies,

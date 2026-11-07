@@ -10,12 +10,6 @@ namespace WebPageScreensaver
         private const string CloseOnMouseMovementName = "CloseOnMouseMovement";
         private const string MultiScreenModeName = "MultiScreenMode";
 
-        private struct SettingDefaultValue
-        {
-            public const int RotationInterval = 30;
-            public const bool Shuffle = false;
-        }
-
         private const string KeyWebPageScreensaver = @"Software\WebPageScreensaver";
 
         private static RegistryKey RootKey => Registry.CurrentUser.GetOrCreateSubKey(KeyWebPageScreensaver);

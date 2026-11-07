@@ -11,6 +11,7 @@ namespace WebPageScreensaver
     internal class ScreenInformation
     {
         private const string URLsName = "URLs";
+        // Written by versions that rotated through several URLs; only deleted now.
         private const string RotationIntervalName = "IntervalRotation";
         private const string ShuffleName = "Shuffle";
         private const string ZoomPercentName = "ZoomPercent";
@@ -30,25 +31,27 @@ namespace WebPageScreensaver
 
         public Rectangle Bounds { get; set; }
 
-        public IEnumerable<string> URLs
+        /// <summary>
+        /// The one web page this screen shows. Each screen used to hold a space-separated list of
+        /// URLs that the screensaver rotated through (optionally shuffled); rotation was removed
+        /// (WebPageScreensaver-memory:pando-0007), and the value keeps its registry name "URLs"
+        /// so settings and backup files written before then still load: only their first entry is
+        /// read. Saving writes the single URL and deletes the rotation values nothing reads now.
+        /// </summary>
+        public string URL
         {
-            get => RootKey
-                    .GetOrCreateValue(URLsName, "https://dotnet.microsoft.com/ https://code.visualstudio.com/" /* default */)
-                    .Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-            set => RootKey.SetValue(URLsName, string.Join(' ', value));
+            get => FirstURL(RootKey.GetOrCreateValue(URLsName, "https://dotnet.microsoft.com/" /* default */));
+            set
+            {
+                RootKey.SetValue(URLsName, FirstURL(value));
+                RootKey.DeleteValue(RotationIntervalName, throwOnMissingValue: false);
+                RootKey.DeleteValue(ShuffleName, throwOnMissingValue: false);
+            }
         }
 
-        public int RotationInterval
-        {
-            get => int.Parse(RootKey.GetOrCreateValue(RotationIntervalName, 10 /* default */));
-            set => RootKey.SetValue(RotationIntervalName, value);
-        }
-
-        public bool Shuffle
-        {
-            get => bool.Parse(RootKey.GetOrCreateValue(ShuffleName, true /* default */));
-            set => RootKey.SetValue(ShuffleName, value);
-        }
+        /// <summary>The first entry of a stored "URLs" value, which before rotation was removed could be a space-separated list.</summary>
+        internal static string FirstURL(string stored) =>
+            stored.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).FirstOrDefault() ?? string.Empty;
 
         /// <summary>
         /// The WebView2 zoom level to apply to every page shown on this screen, as a percentage

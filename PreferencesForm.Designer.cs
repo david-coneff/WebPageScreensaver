@@ -102,7 +102,7 @@
             this._labelWebsiteURLs.Margin = new System.Windows.Forms.Padding(6);
             this._labelWebsiteURLs.Name = "_labelWebsiteURLs";
             this._labelWebsiteURLs.Size = new System.Drawing.Size(452, 23);
-            this._labelWebsiteURLs.Text = "Website URLs:";
+            this._labelWebsiteURLs.Text = "Website URL:";
             this._labelWebsiteURLs.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
             // 
             // _radioButtonSeparateScreens

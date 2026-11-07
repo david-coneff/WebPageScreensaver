@@ -1,6 +1,6 @@
 # Web Page Screensaver
 
-Display webpages as your screensaver.
+Display webpages as your screensaver: one web page per screen (each screen can show its own).
 
 Inspired by its predecesor [cwc/web-page-screensaver](https://github.com/cwc/web-page-screensaver) (_Achived_).
 
@@ -45,8 +45,8 @@ a long time — it can conflict with the screensaver starting on its own).
 
 ## Zoom
 
-Each screen has its own default zoom level (Preferences → the "% zoom" field, next to rotation
-interval) — useful when a display needs a dashboard (e.g. a Home Assistant panel) scaled up or
+Each screen has its own default zoom level (Preferences → the "% zoom" field, under the
+screen's URL) — useful when a display needs a dashboard (e.g. a Home Assistant panel) scaled up or
 down to actually fit. It's applied on every launch, not just remembered from the last time you
 manually zoomed.
 
