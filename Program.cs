@@ -93,6 +93,7 @@ namespace WebPageScreensaver
             // Scoped to the whole /s process, not per-monitor form: one disable/restore pair
             // covers every ScreensaverForm regardless of how many screens are attached.
             AccessibilityShortcuts.Disable();
+            ShellShortcutBlocker.Start();
             try
             {
                 var forms = new List<Form>();
@@ -107,6 +108,7 @@ namespace WebPageScreensaver
             }
             finally
             {
+                ShellShortcutBlocker.Stop();
                 AccessibilityShortcuts.Restore();
             }
         }
