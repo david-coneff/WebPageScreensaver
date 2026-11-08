@@ -2,8 +2,11 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net5.0-windows</TargetFramework>
+    <TargetFramework>net10.0-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
+    <!-- Lets the Windows Desktop targeting pack restore on Linux/macOS, so the release builds
+         cross-compile there (the CI runner is ubuntu); a no-op on Windows. -->
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <Nullable>enable</Nullable>
     <StartupObject>WebPageScreensaver.Program</StartupObject>
     <RootNamespace>WebPageScreensaver</RootNamespace>
@@ -26,6 +29,15 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4191.47" />
   </ItemGroup>
+
+  <!-- The WebView2 package references its WPF control on every .NET 5+ target, with no switch
+       to turn it off. This app uses only the WinForms control; the WPF assembly's WindowsBase
+       5.0 reference conflicts with .NET 10's (MSB3277), so it is dropped before resolution. -->
+  <Target Name="DropWebView2Wpf" BeforeTargets="ResolveAssemblyReferences">
+    <ItemGroup>
+      <Reference Remove="@(Reference)" Condition="'%(Filename)' == 'Microsoft.Web.WebView2.Wpf'" />
+    </ItemGroup>
+  </Target>
 
   <!-- MSBuild's own Copy task, not the OS `copy`/`cp` shell command: this runs identically
        whether the build is invoked from Windows, or cross-compiled from Linux/macOS (the

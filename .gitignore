@@ -6,6 +6,9 @@ __pycache__/
 **/.vscode/
 **/bin/
 **/obj/
+# Publish output and the compiled installer: release artifacts, never committed.
+Publish/
+installer/*.exe
 **/Properties/*
 **/*.user
 
