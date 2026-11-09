@@ -101,7 +101,7 @@ namespace WebPageScreensaver
             }
         }
 
-        private async void ScreensaverForm_Load(object sender, EventArgs e)
+        private async void ScreensaverForm_Load(object? sender, EventArgs e)
         {
             if (_webBrowser == null)
             {

@@ -17,13 +17,10 @@ namespace WebPageScreensaver
     /// this only suppresses the shortcut that turns it on from an idle/off state, which has no
     /// legitimate purpose while a screensaver is showing.
     ///
-    /// Deliberately does NOT attempt to block the Windows key, Alt+Tab, or Ctrl+Shift+Esc (Task
-    /// Manager) — those are shell-level shortcuts that would need a global low-level keyboard
-    /// hook (SetWindowsHookEx/WH_KEYBOARD_LL) to suppress, a materially bigger and riskier
-    /// change than a few accessibility-preference flags, and one that cannot be verified in an
-    /// environment that cannot run this app at all. And it cannot and does not touch Ctrl+Alt+Del
-    /// — the Secure Attention Sequence is a hard OS guarantee no user-mode process can intercept,
-    /// by design.
+    /// The Windows key, Alt+Tab and Ctrl+Shift+Esc (Task Manager) are shell-level shortcuts that
+    /// no accessibility flag reaches; <see cref="ShellShortcutBlocker"/> swallows them with a
+    /// low-level keyboard hook. Neither class can touch Ctrl+Alt+Del — the Secure Attention
+    /// Sequence is a hard OS guarantee no user-mode process can intercept, by design.
     /// </summary>
     internal static class AccessibilityShortcuts
     {

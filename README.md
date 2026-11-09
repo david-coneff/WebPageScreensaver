@@ -10,8 +10,19 @@ Version|64-bit
 ---|---
 | build [`a72b6eb`](https://github.com/david-coneff/WebPageScreensaver/commit/a72b6eb) | [Download](https://github.com/david-coneff/WebPageScreensaver/releases/tag/build-a72b6eb) |
 
-Self-contained single-file build (~130MB) — no separate .NET runtime install needed.
-Published as a [GitHub Release](https://github.com/david-coneff/WebPageScreensaver/releases)
+The release above is the older .NET 5 build. From .NET 10 on there are two builds of the same code;
+pick one:
+
+* **Installer (framework-dependent, ~1 MB, recommended):** `WebPageScreensaver-<version>-setup.exe`.
+  It needs the .NET 10 Desktop Runtime. If the runtime is missing, the setup offers to download
+  Microsoft's runtime installer and run it. Pick this one if you keep .NET updated through Windows
+  Update, or have other .NET 10 apps: the runtime is shared and patched with the OS.
+* **Self-contained (~117 MB):** a single `WebPageScreensaver.scr` that carries its own .NET 10 runtime
+  and needs no install at all. Pick it for a machine you cannot install software on, or one that
+  should not get a system-wide .NET runtime. Its runtime is only patched when you download a newer
+  build.
+
+The self-contained build (~130MB for .NET 5) is published as a [GitHub Release](https://github.com/david-coneff/WebPageScreensaver/releases)
 rather than committed in-tree: the file is well over GitHub's 100MB plain-blob limit, and
 this is a fork, which GitHub does not allow pushing new Git LFS objects to (storage quota
 is billed against the upstream repo owner). Built cross-compiled and never run or tested —
@@ -73,12 +84,19 @@ To run the released build you need:
   runtime is installed (`WebView2Session.cs` passes no fixed browser folder), so no Edge
   Insider/Canary channel is needed.
 
-No .NET runtime install is needed: the release is self-contained.
+* For the installer build only: the .NET 10 Desktop Runtime, which the setup installs if it is
+  missing. The self-contained build needs no .NET runtime install.
 
-To build it you also need a .NET SDK that can target `net5.0-windows` (the project's
-`TargetFramework`).
+To build it you also need the .NET 10 SDK (the project's `TargetFramework` is `net10.0-windows`). It
+builds on Linux and macOS too (`EnableWindowsTargeting`). The installer also needs NSIS 3
+(`makensis`; zlib licence), which runs on all three.
 
 ## Fixes and improvements
+
+### Unreleased
+* Upgrade to .NET 10 (`net10.0-windows`).
+* Two builds: an NSIS installer for the framework-dependent build (it installs the .NET 10 Desktop
+  Runtime when missing), and the self-contained single file.
 
 ### 2.0.2-Alpha
 * TFM is now targeting net5.0-windows (due to WinForms).
@@ -120,4 +138,14 @@ Issues and PRs are welcome.
   dotnet publish -c Release -p:PublishProfile=PublishX64
   ```
 
-  Both profiles and the project agree: self-contained, single-file, `net5.0-windows`, no trimming (Windows Forms does not support it) and no ReadyToRun (it only shortens startup and adds size). Use `PublishX86` for a 32-bit build.
+  That is the self-contained build (`Publish/Release/x64/`). The installer build is the
+  framework-dependent publish, then the NSIS script:
+
+  ```
+  dotnet publish -c Release -p:PublishProfile=PublishX64FrameworkDependent
+  makensis -DVERSION=2.0.2 installer/WebPageScreensaver.nsi
+  ```
+
+  The installer is written to `installer/WebPageScreensaver-<version>-setup.exe`.
+
+  All three profiles and the project agree: single-file, `net10.0-windows`, no trimming (Windows Forms does not support it) and no ReadyToRun (it only shortens startup and adds size). `PublishX64` and `PublishX86` are self-contained; `PublishX64FrameworkDependent` is not. Use `PublishX86` for a 32-bit self-contained build.
